@@ -1,0 +1,20 @@
+relationship 34d2f255-12f9-4b21-b173-b83f4dc67bf9
+	joinOnDateBehavior: datePartOnly
+	fromColumn: NF1.Data
+	toColumn: LocalDateTable_f6a8c71b-5b86-4b19-ba30-53f6ad7029de.Date
+
+relationship 2b913fe4-f936-4b16-93ec-0abdf46a429a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'Resumo NFs'.Data
+	toColumn: LocalDateTable_b17df92e-a1d1-41ed-84d6-f2bde6126c7f.Date
+
+relationship 6f76a3f0-af7a-4f8d-9732-41bd14885e41
+	fromColumn: NFdetalhe.NF
+	toColumn: NF1.NF
+
+relationship 9f2efd43-6149-4824-8a43-bf740ede989e
+	crossFilteringBehavior: bothDirections
+	fromCardinality: one
+	fromColumn: 'Resumo NFs'.NF
+	toColumn: NF1.NF
+

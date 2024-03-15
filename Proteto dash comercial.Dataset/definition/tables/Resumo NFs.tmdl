@@ -1,0 +1,137 @@
+table 'Resumo NFs'
+	lineageTag: d7eb672e-95de-4ff1-8930-f5b369b53922
+
+	measure 'TOTAL GERAL' = SUM('Resumo NFs'[VALOR TOTAL])
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
+		lineageTag: d315f876-4142-43f5-876c-9ca14bdce0bf
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	measure 'QTDE NFs' = COUNT('Resumo NFs'[NF])
+		formatString: 0
+		lineageTag: 9052a757-02a4-4723-be85-be73ef3b80dd
+
+	column NF
+		dataType: int64
+		formatString: 0
+		lineageTag: ce8ef189-fd44-41f5-8363-c3b178e16bb3
+		summarizeBy: none
+		sourceColumn: NF
+
+		annotation SummarizationSetBy = Automatic
+
+	column Data
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 59008f61-d178-43fc-bd49-5e76c2ed51e9
+		summarizeBy: none
+		sourceColumn: Data
+
+		variation Variation
+			isDefault
+			relationship: 2b913fe4-f936-4b16-93ec-0abdf46a429a
+			defaultHierarchy: LocalDateTable_b17df92e-a1d1-41ed-84d6-f2bde6126c7f.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Cliente
+		dataType: string
+		lineageTag: 4dea6a26-b822-4372-9b6e-c7894d0b1f7a
+		summarizeBy: none
+		sourceColumn: Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nº ITENS'
+		dataType: int64
+		formatString: 0
+		lineageTag: 9b9add8d-7064-43cf-832a-8a027fd2d2d7
+		summarizeBy: sum
+		sourceColumn: Nº ITENS
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'VALOR TOTAL'
+		dataType: decimal
+		formatString: "R$"\ #,0.###############;-"R$"\ #,0.###############;"R$"\ #,0.###############
+		lineageTag: c92a6cc7-67a9-4010-a55e-3b522c07d910
+		summarizeBy: sum
+		sourceColumn: VALOR TOTAL
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column Mês
+		dataType: int64
+		formatString: 0
+		lineageTag: 9cab4939-3239-4702-98b8-5b2d91f43977
+		summarizeBy: sum
+		sourceColumn: Mês
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nome do Mês'
+		dataType: string
+		lineageTag: a1b7e595-0729-48cb-bb29-83997b4284b4
+		summarizeBy: none
+		sourceColumn: Nome do Mês
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Codigo Cliente' = upper(left('Resumo NFs'[Cliente],4))
+		dataType: string
+		lineageTag: 6759253e-ae11-451e-977f-ebfd45fed808
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column Comissão =
+			if(and('Resumo NFs'[VALOR TOTAL]>=1000,'Resumo NFs'[Nº ITENS]>=3),
+			                                                        'Resumo NFs'[VALOR TOTAL]*.1,
+			                                                        'Resumo NFs'[VALOR TOTAL]*.05)
+		dataType: decimal
+		formatString: #,0.00%;-#,0.00%;#,0.00%
+		lineageTag: 8b34d0e6-2ee0-4970-b0f9-e8227ed973a3
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column '% Comissao' = 'Resumo NFs'[Comissão]/'Resumo NFs'[VALOR TOTAL]
+		dataType: double
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: c9dc5a8c-2db6-4875-b292-ebe063f5d221
+		summarizeBy: sum
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'GRUPO PERIODO' = IF(OR('Resumo NFs'[Mês]=2,'Resumo NFs'[Mês]=3),"MESES DESTAQUE","MESES NORMAIS")
+		dataType: string
+		lineageTag: 653a9d46-14dd-458f-bcf4-8a3247563159
+		summarizeBy: none
+		isDataTypeInferred
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Resumo NFs-ba1a283f-7ac6-4983-9048-542f1a05942c' = m
+		mode: import
+		source =
+				let
+				    Fonte = Table.NestedJoin(NF1, {"NF"}, NFdetalhe, {"NF"}, "NFdetalhe", JoinKind.LeftOuter),
+				    #"NFdetalhe Agregado" = Table.AggregateTableColumn(Fonte, "NFdetalhe", {{"Produto", List.Count, "Contagem de Produto"}, {"Valor", List.Sum, "Soma de Valor"}}),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"NFdetalhe Agregado",{{"Contagem de Produto", "Nº ITENS"}, {"Soma de Valor", "VALOR TOTAL"}}),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Colunas Renomeadas",{{"Nº ITENS", Int64.Type}, {"VALOR TOTAL", Currency.Type}}),
+				    #"Mês Inserido" = Table.AddColumn(#"Tipo Alterado", "Mês", each Date.Month([Data]), Int64.Type),
+				    #"Nome do Mês Inserido" = Table.AddColumn(#"Mês Inserido", "Nome do Mês", each Date.MonthName([Data]), type text)
+				in
+				    #"Nome do Mês Inserido"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

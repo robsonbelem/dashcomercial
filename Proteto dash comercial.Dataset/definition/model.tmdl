@@ -1,0 +1,23 @@
+model Model
+	culture: pt-BR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBIDesktopVersion = 2.126.1261.0 (24.02)
+
+annotation PBI_QueryOrder = ["NF1","NFdetalhe","Resumo NFs"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table NF1
+ref table DateTableTemplate_38796b24-94cb-4a2f-9598-1e4f934d0648
+ref table LocalDateTable_f6a8c71b-5b86-4b19-ba30-53f6ad7029de
+ref table NFdetalhe
+ref table 'Resumo NFs'
+ref table LocalDateTable_b17df92e-a1d1-41ed-84d6-f2bde6126c7f
+

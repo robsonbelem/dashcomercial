@@ -1,0 +1,52 @@
+table NFdetalhe
+	lineageTag: b2bbb646-0302-456e-b569-4d00c18b8f23
+
+	column NF
+		dataType: int64
+		formatString: 0
+		lineageTag: 773a8ed3-9e75-4954-8172-53d97533dec7
+		summarizeBy: none
+		sourceColumn: NF
+
+		annotation SummarizationSetBy = Automatic
+
+	column Item
+		dataType: int64
+		formatString: 0
+		lineageTag: 8c54e3ab-a121-42ff-bad4-cd77f775f7cb
+		summarizeBy: sum
+		sourceColumn: Item
+
+		annotation SummarizationSetBy = Automatic
+
+	column Produto
+		dataType: string
+		lineageTag: cc4b9d33-6482-43b8-aa23-1c8852e4bd40
+		summarizeBy: none
+		sourceColumn: Produto
+
+		annotation SummarizationSetBy = Automatic
+
+	column Valor
+		dataType: int64
+		formatString: 0
+		lineageTag: 51eba28d-21f2-497a-8664-49bdb84ddc5e
+		summarizeBy: sum
+		sourceColumn: Valor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition NFdetalhe-d4fc5c80-4514-428b-a5f7-f0a0c8db4520 = m
+		mode: import
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("C:\Users\Editora\Desktop\Funções DAX\03 Notas Fiscais.xlsx"), null, true),
+				    NFdetalhe_Table = Fonte{[Item="NFdetalhe",Kind="Table"]}[Data],
+				    #"Tipo Alterado" = Table.TransformColumnTypes(NFdetalhe_Table,{{"NF", Int64.Type}, {"Item", Int64.Type}, {"Produto", type text}, {"Valor", Int64.Type}})
+				in
+				    #"Tipo Alterado"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

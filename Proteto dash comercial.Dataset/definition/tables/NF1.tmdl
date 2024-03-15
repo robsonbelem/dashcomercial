@@ -1,0 +1,56 @@
+table NF1
+	lineageTag: cfeb129e-669f-449f-863f-0c5d51dd3df9
+
+	measure 'TICKET MÉDIO' = AVERAGE('Resumo NFs'[VALOR TOTAL])
+		formatString: "R$"\ #,0.00;-"R$"\ #,0.00;"R$"\ #,0.00
+		lineageTag: b8b3a2c7-dbc5-4153-8a34-3ef9cd30f273
+
+		annotation PBI_FormatHint = {"currencyCulture":"pt-BR"}
+
+	column NF
+		dataType: int64
+		formatString: 0
+		lineageTag: f7a48ecf-a135-402c-85f3-5074f2385341
+		summarizeBy: none
+		sourceColumn: NF
+
+		annotation SummarizationSetBy = Automatic
+
+	column Data
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f1ba35ac-23e4-4009-9dec-79ee36477aaa
+		summarizeBy: none
+		sourceColumn: Data
+
+		variation Variation
+			isDefault
+			relationship: 34d2f255-12f9-4b21-b173-b83f4dc67bf9
+			defaultHierarchy: LocalDateTable_f6a8c71b-5b86-4b19-ba30-53f6ad7029de.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Cliente
+		dataType: string
+		lineageTag: ea7552cf-f111-4310-a80e-aad103a6d89b
+		summarizeBy: none
+		sourceColumn: Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+	partition NF1-9a75d252-daa9-46ef-99ad-b9894844e25f = m
+		mode: import
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("C:\Users\Editora\Desktop\Funções DAX\03 Notas Fiscais.xlsx"), null, true),
+				    NF_Table = Fonte{[Item="NF",Kind="Table"]}[Data],
+				    #"Tipo Alterado" = Table.TransformColumnTypes(NF_Table,{{"NF", Int64.Type}, {"Data", type date}, {"Cliente", type text}})
+				in
+				    #"Tipo Alterado"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
